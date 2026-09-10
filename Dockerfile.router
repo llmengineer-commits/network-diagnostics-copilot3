@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir flask requests python-dotenv
+
+COPY mock_router/ mock_router/
+
+# SITE_PROFILE and PORT are set per-instance in docker-compose.yml, so the
+# same image simulates any of the three sites.
+CMD ["python", "mock_router/app.py"]

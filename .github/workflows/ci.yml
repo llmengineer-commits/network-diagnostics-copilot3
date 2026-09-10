@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # sentence-transformers/torch are heavy and not needed for unit
+          # tests (retrieval tests that need a real embedding model are
+          # skipped in CI — see tests/test_ingest.py); install the
+          # lighter subset actually exercised by the test suite.
+          pip install flask requests python-dotenv pytest langchain-core
+
+      - name: Compile check
+        run: |
+          python -m py_compile ingest.py evaluate.py run_agent.py mock_router/app.py config/sites.py agent/*.py
+
+      - name: Run unit tests
+        run: |
+          python -m pytest tests/ -v

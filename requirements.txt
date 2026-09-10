@@ -1,0 +1,21 @@
+# Core agent framework
+langchain>=1.4.0
+langchain-core>=0.3.0
+langchain-groq>=0.2.0
+
+# Retrieval
+qdrant-client>=1.12.0
+sentence-transformers>=3.3.0
+
+# Mock router / tool-calling
+flask>=3.0.0
+requests>=2.32.0
+
+# Threat intelligence (general web search fallback — optional but recommended)
+ddgs>=9.0.0
+
+# Config
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=8.0.0

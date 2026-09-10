@@ -1,0 +1,63 @@
+# Brings up all three simulated remote sites plus the agent with one command:
+#   docker compose up --build
+#
+# This is what makes "remote troubleshooting" reviewable in one step — three
+# independent router instances, each with its own seeded fault scenario,
+# standing in for physically separate ISP sites.
+
+services:
+  router-cbd:
+    build:
+      context: .
+      dockerfile: Dockerfile.router
+    environment:
+      SITE_PROFILE: cbd
+      PORT: 8088
+    ports:
+      - "8088:8088"
+
+  router-westlands:
+    build:
+      context: .
+      dockerfile: Dockerfile.router
+    environment:
+      SITE_PROFILE: westlands
+      PORT: 8089
+    ports:
+      - "8089:8089"
+
+  router-thika-road:
+    build:
+      context: .
+      dockerfile: Dockerfile.router
+    environment:
+      SITE_PROFILE: thika_road
+      PORT: 8090
+    ports:
+      - "8090:8090"
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - router-cbd
+      - router-westlands
+      - router-thika-road
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      SITE_CBD_URL: http://router-cbd:8088
+      SITE_WESTLANDS_URL: http://router-westlands:8089
+      SITE_THIKA_ROAD_URL: http://router-thika-road:8090
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      AUDIT_LOG_PATH: /app/audit/audit_log.jsonl
+    volumes:
+      - qdrant_data:/app/qdrant_data
+      - audit_data:/app/audit
+    stdin_open: true
+    tty: true
+
+volumes:
+  qdrant_data:
+  audit_data:
